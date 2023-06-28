@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from "express";
 import Product from "../entity/productEntity";
-import mongoose, { ObjectId, mongo } from "mongoose";
 
 const postProduct = async (req: Request, res: Response, next: NextFunction) => {
   try {

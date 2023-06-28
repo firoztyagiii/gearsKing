@@ -1,5 +1,22 @@
 import mongoose, { Schema } from "mongoose";
 
+const productDetailSchema = new Schema(
+  {
+    attrKey: {
+      type: String,
+      required: [true, "Attribute key is required for the product details"],
+    },
+    attrValue: {
+      type: String,
+      required: [true, "Attribute value is required for the product details"],
+    },
+  },
+  {
+    _id: false,
+    versionKey: false,
+  }
+);
+
 const productSchema = new Schema<IProduct.ProductDocument>({
   name: {
     type: String,
@@ -32,16 +49,14 @@ const productSchema = new Schema<IProduct.ProductDocument>({
     default: 0,
   },
   productDetails: {
-    type: [
-      {
-        attrKey: {
-          type: String,
-        },
-        attrValue: {
-          type: String,
-        },
+    type: [productDetailSchema],
+    required: [true, "Product details are required"],
+    validate: {
+      validator: function (v: IProduct.ProductDetails[]): boolean {
+        return v.length > 0;
       },
-    ],
+      message: "At least one detail is required",
+    },
   },
   thumbnail: {
     type: String,

@@ -7,17 +7,19 @@ const reviewSchema = new Schema<IReview.ReviewDocument>({
   },
   ratings: {
     type: Number,
-    required: [true, "Ratins are required"],
+    required: [true, "Ratings are required"],
     min: [1, "Minimum rating should be 1"],
     max: [5, "Maximum rating should be 5"],
   },
   product: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Products",
+    required: [true, "Product is required to post a review"],
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Users",
+    required: [true, "User is required to post a review"],
   },
   createdAt: {
     type: Date,

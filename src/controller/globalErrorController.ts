@@ -2,6 +2,15 @@ import { ErrorRequestHandler, Response } from "express";
 
 const handleValidationError = (err: any, res: Response) => {
   let message: string[] = [];
+
+  if (err.message.includes("Cast to ObjectId")) {
+    message.push(err.message.split('"')[1]);
+    return res.status(400).json({
+      status: "failed",
+      message: `Strings ${message.join(", ")} cannot be converted to ObjectId`,
+    });
+  }
+
   for (const error in err.errors) {
     message.push(err.errors[error].message);
   }
@@ -40,10 +49,7 @@ const globalError: ErrorRequestHandler = (err, req, res, next) => {
   if (err.code === 11000) {
     return handleDuplicateKeyError(err, res);
   }
-  if (err.name === "ObjectParameterError") {
-    console.log(err);
-  }
-  res.json({ msg: err.message });
+  res.json(err);
 };
 
 export default globalError;

@@ -5,10 +5,10 @@ export as namespace IReview;
 export interface Review {
   review: string;
   ratings: number;
+  user: Types.ObjectId;
+  product: Types.ObjectId;
 }
 
 export interface ReviewDocument extends Review, Document {
   createdAt: Date;
-  user: Types.ObjectId;
-  product: Types.ObjectId;
 }

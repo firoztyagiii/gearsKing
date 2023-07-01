@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import * as User from "../entity/userEntity";
+import User from "../entity/userEntity";
 import AppError from "../utils/AppError";
 import jwt from "jsonwebtoken";
 
@@ -31,7 +31,7 @@ const signUp = async (req: Request, res: Response, next: NextFunction) => {
     res.status(201).json({
       status: "success",
       data: {
-        id: user._id,
+        id: user?._id,
       },
     });
   } catch (err) {
@@ -46,6 +46,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
       return next(new AppError("Email and password are required", 400));
     }
     const user = await User.findByEmail(email);
+    if (!user) return next(new AppError("Invalid email", 400));
     const isPassCorrect = await user.compare(password);
     if (!isPassCorrect) return next(new AppError("Invalid credentials", 400));
     const token = await signToken({ id: user._id });

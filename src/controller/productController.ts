@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import Product from "../entity/productEntity";
+import mongoose from "mongoose";
 
 const postProduct = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -12,6 +13,7 @@ const postProduct = async (req: Request, res: Response, next: NextFunction) => {
       images,
       productDetails,
     } = req.body;
+
     const product = await Product.create({
       name,
       description,
@@ -33,7 +35,7 @@ const postProduct = async (req: Request, res: Response, next: NextFunction) => {
 const getProduct = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
-    const product = await Product.findOne(id);
+    const product = await Product.findOne(new mongoose.Types.ObjectId(id));
     res.status(200).json({
       status: "success",
       data: product,

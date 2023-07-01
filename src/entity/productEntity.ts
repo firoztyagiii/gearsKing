@@ -1,23 +1,23 @@
-import AppError from "../utils/AppError";
 import ProductModel from "../model/productModel";
+import BaseEntity from "./baseEntity";
 
-const create = async (
-  product: IProduct.Product
-): Promise<IProduct.ProductDocument> => {
-  return await ProductModel.create(product);
-};
+import { Model, Types } from "mongoose";
 
-const findOne = async (id: string): Promise<IProduct.ProductDocument> => {
-  const product = await ProductModel.findOne({ _id: id });
-  if (!product) {
-    throw new AppError("No product found", 400);
+class ProductEntity<D> extends BaseEntity<D> {
+  constructor(model: Model<D>) {
+    super(model);
   }
-  return product;
-};
 
-const findAll = async (): Promise<IProduct.ProductDocument[]> => {
-  const products = await ProductModel.find();
-  return products;
-};
+  async updateReview(
+    id: Types.ObjectId,
+    payload: { total: number; average: number }
+  ): Promise<D | null> {
+    return await this.model.findOneAndUpdate({ _id: id }, payload, {
+      new: true,
+    });
+  }
+}
 
-export default { create, findOne, findAll };
+const productEntity = new ProductEntity<IProduct.ProductDocument>(ProductModel);
+
+export default productEntity;

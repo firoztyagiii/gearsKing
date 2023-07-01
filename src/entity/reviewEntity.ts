@@ -1,10 +1,13 @@
 import ReviewModel from "../model/reviewModel";
+import BaseEntity from "./baseEntity";
+import { Model } from "mongoose";
 
-const postReview = async (
-  rev: IReview.Review
-): Promise<IReview.ReviewDocument> => {
-  const createdReview = await ReviewModel.create(rev);
-  return createdReview;
-};
+class ReviewEntity<D> extends BaseEntity<D> {
+  constructor(model: Model<D>) {
+    super(model);
+  }
+}
 
-export { postReview };
+const reviewEntity = new ReviewEntity<IReview.ReviewDocument>(ReviewModel);
+
+export default reviewEntity;

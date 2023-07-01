@@ -1,10 +1,10 @@
 import { Request, Response, NextFunction } from "express";
-import * as Review from "../entity/reviewEntity";
+import Review from "../entity/reviewEntity";
 
 const postReview = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { review, ratings, user, product } = req.body;
-    const createdReview = await Review.postReview({
+    const createdReview = await Review.create({
       review,
       ratings,
       user,

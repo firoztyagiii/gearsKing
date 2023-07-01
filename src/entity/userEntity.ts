@@ -1,17 +1,17 @@
+import BaseEntity from "./baseEntity";
 import UserModel from "../model/userModel";
-import AppError from "../utils/AppError";
 
-const create = async (user: IUser.User): Promise<IUser.UserDocument> => {
-  const createdUser = await UserModel.create(user);
-  return createdUser;
-};
+import { Model } from "mongoose";
 
-const findByEmail = async (email: string): Promise<IUser.UserDocument> => {
-  const user = await UserModel.findOne({ email });
-  if (!user) {
-    throw new AppError("Invalid credentials", 400);
+class UserEntity<D> extends BaseEntity<D> {
+  constructor(model: Model<D>) {
+    super(model);
   }
-  return user;
-};
+  async findByEmail(email: string): Promise<D | null> {
+    return await this.model.findOne({ email });
+  }
+}
 
-export { create, findByEmail };
+const userEntity = new UserEntity<IUser.UserDocument>(UserModel);
+
+export default userEntity;

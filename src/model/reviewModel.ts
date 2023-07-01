@@ -1,4 +1,5 @@
 import mongoose, { Schema } from "mongoose";
+import Product from "../entity/productEntity";
 
 const reviewSchema = new Schema<IReview.ReviewDocument>({
   review: {
@@ -25,6 +26,28 @@ const reviewSchema = new Schema<IReview.ReviewDocument>({
     type: Date,
     default: Date.now(),
   },
+});
+
+reviewSchema.post("save", async function (doc) {
+  try {
+    const agg = await ReviewModel.aggregate([
+      { $match: { product: doc.product } },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: 1 },
+          average: { $avg: "$ratings" },
+        },
+      },
+    ]);
+    const { total, average } = agg[0];
+    const updatedProduct = await Product.updateReview(doc._id, {
+      total,
+      average,
+    });
+  } catch (err) {
+    throw err;
+  }
 });
 
 const ReviewModel = mongoose.model<IReview.ReviewDocument>(

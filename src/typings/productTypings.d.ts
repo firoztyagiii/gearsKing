@@ -1,6 +1,6 @@
 export as namespace IProduct;
 
-import { Document } from "mongoose";
+import { Document, Model } from "mongoose";
 
 interface ProductDetails {
   attrKey: string;
@@ -20,3 +20,5 @@ export interface Product {
 }
 
 export interface ProductDocument extends Product, Document {}
+
+export interface ProductModel extends Model<Product, ProductDocument> {}

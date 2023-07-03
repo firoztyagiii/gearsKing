@@ -17,8 +17,7 @@ export interface Product {
   productDetails: ProductDetails[];
   thumbnail: string;
   images: string[];
+  category: string;
 }
 
 export interface ProductDocument extends Product, Document {}
-
-export interface ProductModel extends Model<Product, ProductDocument> {}

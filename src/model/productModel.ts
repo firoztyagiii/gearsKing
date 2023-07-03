@@ -62,6 +62,10 @@ const productSchema = new Schema<IProduct.ProductDocument>({
     type: String,
     required: [true, "Thumbnail is required"],
   },
+  category: {
+    type: String,
+    required: [true, "Category is required"],
+  },
   images: {
     type: [String],
     required: [true, "Images are required"],

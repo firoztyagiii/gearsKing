@@ -1,10 +1,7 @@
 import { Model, Types } from "mongoose";
 
 class BaseEntity<D> {
-  model: Model<D>;
-  constructor(model: Model<D>) {
-    this.model = model;
-  }
+  constructor(protected model: Model<D>) {}
 
   async findOne(id: Types.ObjectId): Promise<D | null> {
     return await this.model.findOne({ _id: id });

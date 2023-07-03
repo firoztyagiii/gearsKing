@@ -46,7 +46,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
       return next(new AppError("Email and password are required", 400));
     }
     const user = await User.findByEmail(email);
-    if (!user) return next(new AppError("Invalid email", 400));
+    if (!user) return next(new AppError("Invalid credentials", 400));
     const isPassCorrect = await user.compare(password);
     if (!isPassCorrect) return next(new AppError("Invalid credentials", 400));
     const token = await signToken({ id: user._id });

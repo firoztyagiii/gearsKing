@@ -1,4 +1,4 @@
-import { Types, Document } from "mongoose";
+import { Types, Document, Model } from "mongoose";
 
 export as namespace IReview;
 
@@ -9,6 +9,15 @@ export interface Review {
   product: Types.ObjectId;
 }
 
+export interface ReviewStaticMethods {
+  updateReviews(): void;
+  myStaticMethod(): number;
+}
+
 export interface ReviewDocument extends Review, Document {
   createdAt: Date;
 }
+
+export interface ReviewModel
+  extends Model<ReviewDocument>,
+    ReviewStaticMethods {}

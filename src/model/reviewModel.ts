@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import Product from "../entity/productEntity";
 
-const reviewSchema = new Schema<IReview.ReviewDocument>({
+const reviewSchema = new Schema<IReview.ReviewDocument, IReview.ReviewModel>({
   review: {
     type: String,
     required: [true, "Review is required"],
@@ -28,7 +28,7 @@ const reviewSchema = new Schema<IReview.ReviewDocument>({
   },
 });
 
-reviewSchema.post("save", async function (doc) {
+reviewSchema.post("save", async function (doc: IReview.ReviewDocument) {
   try {
     const agg = await ReviewModel.aggregate([
       { $match: { product: doc.product } },
@@ -41,7 +41,7 @@ reviewSchema.post("save", async function (doc) {
       },
     ]);
     const { total, average } = agg[0];
-    const updatedProduct = await Product.updateReview(doc._id, {
+    await Product.updateReview(doc.product, {
       total,
       average,
     });
@@ -50,7 +50,32 @@ reviewSchema.post("save", async function (doc) {
   }
 });
 
-const ReviewModel = mongoose.model<IReview.ReviewDocument>(
+reviewSchema.post(
+  "findOneAndUpdate",
+  async function (doc: IReview.ReviewDocument) {
+    try {
+      const agg = await ReviewModel.aggregate([
+        { $match: { product: doc.product } },
+        {
+          $group: {
+            _id: null,
+            total: { $sum: 1 },
+            average: { $avg: "$ratings" },
+          },
+        },
+      ]);
+      const { total, average } = agg[0];
+      await Product.updateReview(doc.product, {
+        total,
+        average,
+      });
+    } catch (err) {
+      throw err;
+    }
+  }
+);
+
+const ReviewModel = mongoose.model<IReview.ReviewDocument, IReview.ReviewModel>(
   "Reviews",
   reviewSchema
 );

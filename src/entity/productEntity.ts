@@ -12,9 +12,13 @@ class ProductEntity<D> extends BaseEntity<D> {
     id: Types.ObjectId,
     payload: { total: number; average: number }
   ): Promise<D | null> {
-    return await this.model.findOneAndUpdate({ _id: id }, payload, {
-      new: true,
-    });
+    return await this.model.findOneAndUpdate(
+      { _id: id },
+      { totalReviews: payload.total, averageReview: payload.average },
+      {
+        new: true,
+      }
+    );
   }
 }
 

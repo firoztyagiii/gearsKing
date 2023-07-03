@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import Product from "../entity/productEntity";
 import mongoose from "mongoose";
+import AppError from "../utils/AppError";
 
 const postProduct = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -12,6 +13,7 @@ const postProduct = async (req: Request, res: Response, next: NextFunction) => {
       thumbnail,
       images,
       productDetails,
+      category,
     } = req.body;
 
     const product = await Product.create({
@@ -22,6 +24,7 @@ const postProduct = async (req: Request, res: Response, next: NextFunction) => {
       thumbnail,
       images,
       productDetails,
+      category,
     });
     res.status(201).json({
       status: "success",
@@ -36,6 +39,9 @@ const getProduct = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
     const product = await Product.findOne(new mongoose.Types.ObjectId(id));
+    if (!product) {
+      return next(new AppError("No product found", 400));
+    }
     res.status(200).json({
       status: "success",
       data: product,
@@ -49,6 +55,7 @@ const getProducts = async (req: Request, res: Response, next: NextFunction) => {
   const products = await Product.findAll();
   res.status(200).json({
     status: "success",
+    total: products.length,
     data: products,
   });
 };

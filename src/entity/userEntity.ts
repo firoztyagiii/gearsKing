@@ -7,6 +7,7 @@ class UserEntity<D> extends BaseEntity<D> {
   constructor(model: Model<D>) {
     super(model);
   }
+
   async findByEmail(email: string): Promise<D | null> {
     return await this.model.findOne({ email });
   }

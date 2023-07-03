@@ -36,6 +36,13 @@ const handleDuplicateKeyError = (err: any, res: Response) => {
   });
 };
 
+const handleJsonWebTokenError = (err: any, res: Response) => {
+  res.status(401).json({
+    status: "failed",
+    message: "You are not logged in, invalid token",
+  });
+};
+
 const globalError: ErrorRequestHandler = (err, req, res, next) => {
   if (err.isOperational) {
     return res.status(err.code).json({
@@ -48,6 +55,9 @@ const globalError: ErrorRequestHandler = (err, req, res, next) => {
   }
   if (err.code === 11000) {
     return handleDuplicateKeyError(err, res);
+  }
+  if (err.name === "JsonWebTokenError" && err.message === "invalid signature") {
+    return handleJsonWebTokenError(err, res);
   }
   res.json(err);
 };

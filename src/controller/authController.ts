@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import crypto from "crypto";
 import AppError from "../utils/AppError";
 import User from "../entity/userEntity";
 import jwt, { JwtPayload } from "jsonwebtoken";
@@ -46,6 +47,63 @@ const protectRoute = async (
   }
 };
 
+const forgetPassword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return next(
+        new AppError("Email is required in order to reset the password", 400)
+      );
+    }
+    const user = await User.findByEmail(email);
+    if (!user) {
+      return next(new AppError("No user exists", 400));
+    }
+    const hash = crypto.randomBytes(120).toString("hex");
+    user.passwordResetToken = hash;
+    user.resetTokenExpiresAt = new Date(Date.now() + 60 * 60 * 1000);
+    await user.save({ validateBeforeSave: false });
+    res.status(200).json({
+      status: "success",
+      message: "Email sent with the password reset URL",
+      token: hash,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const resetPassword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { resetToken } = req.query;
+    const { password, confirmPassword } = req.body;
+    if (!resetToken || typeof resetToken !== "string") {
+      return next(new AppError("No reset token found", 400));
+    }
+    const user = await User.findByResetToken(resetToken);
+    if (!user) {
+      return next(new AppError("Invalid token or token has expired", 400));
+    }
+    user.password = password;
+    user.confirmPassword = confirmPassword;
+    const updatedUser = await user.save({ validateBeforeSave: true });
+    res.status(201).json({
+      status: "success",
+      message: "Password changed successfully",
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 const protectedTo = (...roles: string[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
     if (!roles.includes(res.locals.user.role)) {
@@ -55,4 +113,4 @@ const protectedTo = (...roles: string[]) => {
   };
 };
 
-export { protectRoute, protectedTo };
+export { protectRoute, protectedTo, forgetPassword, resetPassword };

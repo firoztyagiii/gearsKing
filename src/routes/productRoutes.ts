@@ -6,7 +6,8 @@ import * as productController from "../controller/productController";
 router
   .route("/:id")
   .get(productController.getProduct)
-  .patch(productController.patchProduct);
+  .patch(productController.patchProduct)
+  .delete(productController.deleteProduct);
 
 router
   .route("/")

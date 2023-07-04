@@ -11,6 +11,13 @@ class UserEntity<D> extends BaseEntity<D> {
   async findByEmail(email: string): Promise<D | null> {
     return await this.model.findOne({ email });
   }
+
+  async findByResetToken(token: string | string[]) {
+    return await this.model.findOne({
+      passwordResetToken: token,
+      resetTokenExpiresAt: { $gte: Date.now() },
+    });
+  }
 }
 
 const userEntity = new UserEntity<IUser.UserDocument>(UserModel);

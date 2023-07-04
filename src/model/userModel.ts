@@ -47,19 +47,25 @@ const userSchema = new Schema<IUser.UserDocument>({
     type: Date,
     default: Date.now(),
   },
+  passwordResetToken: {
+    type: String,
+  },
+  resetTokenExpiresAt: {
+    type: Date,
+  },
 });
 
 userSchema.pre("save", async function (next) {
-  if (!this.isNew || !this.isModified("password")) {
-    next();
-    return;
+  if (!this.isNew && !this.isModified("password")) {
+    return next();
   }
   if (this.password !== this.confirmPassword) {
-    next(new AppError("Passwords no do match", 400));
-    return;
+    return next(new AppError("Passwords no do match", 400));
   }
   this.password = await bcryptjs.hash(this.password, 8);
   this.confirmPassword = undefined;
+  this.passwordResetToken = undefined;
+  this.resetTokenExpiresAt = undefined;
   next();
 });
 

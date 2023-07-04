@@ -14,5 +14,7 @@ export interface User {
 }
 
 export interface UserDocument extends User, Document {
+  passwordResetToken: string | undefined;
+  resetTokenExpiresAt: Date | undefined;
   compare(password: string): Promise<boolean>;
 }

@@ -96,4 +96,21 @@ const patchProduct = async (
   }
 };
 
-export { postProduct, getProduct, getProducts, patchProduct };
+const deleteProduct = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { id } = req.params;
+    await await Product.delete(new mongoose.Types.ObjectId(id));
+    res.status(202).json({
+      status: "success",
+      data: null,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export { postProduct, getProduct, getProducts, patchProduct, deleteProduct };

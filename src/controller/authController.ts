@@ -46,4 +46,13 @@ const protectRoute = async (
   }
 };
 
-export { protectRoute };
+const protectedTo = (...roles: string[]) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    if (!roles.includes(res.locals.user.role)) {
+      return next(new AppError("You are not allowed", 401));
+    }
+    next();
+  };
+};
+
+export { protectRoute, protectedTo };

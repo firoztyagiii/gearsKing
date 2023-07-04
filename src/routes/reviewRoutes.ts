@@ -7,7 +7,9 @@ import { protectRoute } from "../controller/authController";
 router
   .route("/:id")
   .get(reviewController.getReview)
-  .patch(protectRoute, reviewController.patchReview);
+  .patch(protectRoute, reviewController.patchReview)
+  .delete(protectRoute, reviewController.deleteReview);
+
 router.route("/").post(protectRoute, reviewController.postReview);
 
 export default router;

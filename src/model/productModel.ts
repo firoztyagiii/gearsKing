@@ -1,4 +1,6 @@
+import slugify from "slugify";
 import mongoose, { Schema } from "mongoose";
+import { NextFunction } from "express";
 
 const productDetailSchema = new Schema(
   {
@@ -66,6 +68,11 @@ const productSchema = new Schema<IProduct.ProductDocument>({
     type: String,
     required: [true, "Category is required"],
   },
+  // user: {
+  //   type: Types.ObjectId,
+  //   ref: "Users",
+  //   required: [true, "User is required"],
+  // },
   images: {
     type: [String],
     required: [true, "Images are required"],
@@ -76,6 +83,10 @@ const productSchema = new Schema<IProduct.ProductDocument>({
       message: "At least 3 images are required",
     },
   },
+});
+
+productSchema.pre("save", function (this: IProduct.ProductDocument, next) {
+  console.log("saving");
 });
 
 const ProductModel = mongoose.model<IProduct.ProductDocument>(

@@ -62,4 +62,30 @@ const patchReview = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export { postReview, getReview, patchReview };
+const deleteReview = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { id } = req.params;
+    const review = await Review.findOne(new mongoose.Types.ObjectId(id));
+    if (!review) {
+      return next(new AppError("No review found", 400));
+    }
+    if (review.user.toString() !== res.locals.user._id.toString()) {
+      return next(
+        new AppError("You are not allowed to delete this review", 401)
+      );
+    }
+    await Review.delete(new mongoose.Types.ObjectId(id));
+    res.status(202).json({
+      status: "success",
+      data: null,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export { postReview, getReview, patchReview, deleteReview };

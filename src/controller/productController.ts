@@ -60,4 +60,40 @@ const getProducts = async (req: Request, res: Response, next: NextFunction) => {
   });
 };
 
-export { postProduct, getProduct, getProducts };
+const patchProduct = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { id } = req.params;
+    const {
+      name,
+      description,
+      price,
+      stock,
+      thumbnail,
+      images,
+      productDetails,
+      category,
+    } = req.body;
+    const product = await Product.update(new mongoose.Types.ObjectId(id), {
+      name,
+      description,
+      price,
+      stock,
+      thumbnail,
+      images,
+      productDetails,
+      category,
+    });
+    res.status(201).json({
+      status: "success",
+      data: product,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export { postProduct, getProduct, getProducts, patchProduct };

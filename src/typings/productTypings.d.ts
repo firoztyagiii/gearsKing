@@ -1,6 +1,6 @@
 export as namespace IProduct;
 
-import { Document, Model } from "mongoose";
+import { Document, Model, Types } from "mongoose";
 
 interface ProductDetails {
   attrKey: string;
@@ -12,12 +12,14 @@ export interface Product {
   description: string;
   price: number;
   stock: number;
-  totalReviews?: number;
-  averageReview?: number;
   productDetails: ProductDetails[];
   thumbnail: string;
   images: string[];
   category: string;
 }
 
-export interface ProductDocument extends Product, Document {}
+export interface ProductDocument extends Product, Document {
+  totalReviews: number;
+  averageReview: number;
+  // user: Types.ObjectId;
+}

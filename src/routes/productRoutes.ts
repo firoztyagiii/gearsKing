@@ -3,8 +3,14 @@ const router = express.Router();
 
 import * as productController from "../controller/productController";
 
-router.get("/:id", productController.getProduct);
-router.get("/", productController.getProducts);
-router.post("/", productController.postProduct);
+router
+  .route("/:id")
+  .get(productController.getProduct)
+  .patch(productController.patchProduct);
+
+router
+  .route("/")
+  .get(productController.getProducts)
+  .post(productController.postProduct);
 
 export default router;

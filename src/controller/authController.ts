@@ -94,7 +94,7 @@ const resetPassword = async (
     }
     user.password = password;
     user.confirmPassword = confirmPassword;
-    const updatedUser = await user.save({ validateBeforeSave: true });
+    await user.save({ validateBeforeSave: true });
     res.status(201).json({
       status: "success",
       message: "Password changed successfully",

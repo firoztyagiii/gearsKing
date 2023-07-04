@@ -52,12 +52,17 @@ const getProduct = async (req: Request, res: Response, next: NextFunction) => {
 };
 
 const getProducts = async (req: Request, res: Response, next: NextFunction) => {
-  const products = await Product.findAll();
-  res.status(200).json({
-    status: "success",
-    total: products.length,
-    data: products,
-  });
+  try {
+    const products = await Product.findAllProducts(req.query);
+    res.status(200).json({
+      status: "success",
+      total: products?.length,
+      data: products,
+    });
+  } catch (err) {
+    console.log(err);
+    next(err);
+  }
 };
 
 const patchProduct = async (

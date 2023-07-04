@@ -59,4 +59,20 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export { signUp, login };
+const aboutMe = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const user = await User.findByEmail(res.locals.user.email);
+    if (!user) {
+      return next(new AppError("No user found", 400));
+    }
+    user.password = "";
+    res.status(200).json({
+      status: "success",
+      data: user,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export { signUp, login, aboutMe };

@@ -7,13 +7,13 @@ export interface User {
   email: string;
   username: string;
   password: string;
-  photo?: string;
-  role?: UserRole;
-  createdAt?: Date;
   confirmPassword: string | undefined;
 }
 
 export interface UserDocument extends User, Document {
+  photo: string;
+  role: UserRole;
+  createdAt: Date;
   passwordResetToken: string | undefined;
   resetTokenExpiresAt: Date | undefined;
   compare(password: string): Promise<boolean>;

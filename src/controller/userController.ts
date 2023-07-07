@@ -22,12 +22,16 @@ const signToken = (payload: object) => {
 const signUp = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { email, password, username, confirmPassword } = req.body;
+
     const user = await User.create({
       email,
       password,
       username,
       confirmPassword,
     });
+
+    if (!user) return next(new AppError("Could not create user", 500));
+
     res.status(201).json({
       status: "success",
       data: {
@@ -35,6 +39,7 @@ const signUp = async (req: Request, res: Response, next: NextFunction) => {
       },
     });
   } catch (err) {
+    console.log(err);
     next(err);
   }
 };

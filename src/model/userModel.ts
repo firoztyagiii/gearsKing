@@ -1,6 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import bcryptjs from "bcryptjs";
 import AppError from "../utils/AppError";
+import { createUser } from "../services/redis/queries/user";
 
 import { UserRole } from "../config/enums";
 
@@ -67,6 +68,15 @@ userSchema.pre("save", async function (next) {
   this.passwordResetToken = undefined;
   this.resetTokenExpiresAt = undefined;
   next();
+});
+
+userSchema.post<IUser.UserDocument>("save", async function () {
+  try {
+    console.log(this);
+    await createUser(this._id, this);
+  } catch (err) {
+    throw err;
+  }
 });
 
 userSchema.methods.compare = async function (pass: string): Promise<boolean> {

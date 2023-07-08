@@ -1,7 +1,7 @@
 import Redis from "ioredis";
 
 class RedisService {
-  client;
+  private client;
   constructor() {
     this.client = new Redis();
     this.onConnect();
@@ -20,6 +20,14 @@ class RedisService {
   async getHash<T>(key: string): Promise<T> {
     const doc = await this.client.hgetall(key);
     return doc as T;
+  }
+
+  async createSortedSet(key: string, data: { score: number; member: string }) {
+    await this.client.zadd(key, data.score, data.member);
+  }
+
+  async getSortedSetMember(key: string, member: string) {
+    return await this.client.zscore(key, member);
   }
 }
 

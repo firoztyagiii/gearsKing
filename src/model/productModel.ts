@@ -1,6 +1,5 @@
 import slugify from "slugify";
 import mongoose, { Schema } from "mongoose";
-import { NextFunction } from "express";
 
 const productDetailSchema = new Schema(
   {
@@ -85,9 +84,7 @@ const productSchema = new Schema<IProduct.ProductDocument>({
   },
 });
 
-productSchema.pre("save", function (this: IProduct.ProductDocument, next) {
-  console.log("saving");
-});
+productSchema.post<IProduct.ProductDocument>("save", function () {});
 
 const ProductModel = mongoose.model<IProduct.ProductDocument>(
   "Products",

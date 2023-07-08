@@ -1,4 +1,6 @@
 import { Request, Response, NextFunction } from "express";
+import redisClient from "../services/redis/redisClient";
+import { userKey } from "../services/util/keys";
 import crypto from "crypto";
 import AppError from "../utils/AppError";
 import User from "../entity/userEntity";
@@ -17,6 +19,11 @@ const verifyToken = (token: string): JwtPayload => {
   });
 };
 
+// users --> {
+// key: value,
+// key2: value,
+// }
+
 const protectRoute = async (
   req: Request,
   res: Response,
@@ -34,7 +41,16 @@ const protectRoute = async (
     if (!token) {
       return next(new AppError("You are not logged in", 401));
     }
+
     const decodedPayload = await verifyToken(token);
+
+    const redisUser = await redisClient.getHash<IRedisUser.UserDocument>(
+      userKey(decodedPayload.id)
+    );
+    if (redisUser) {
+      res.locals.user = redisUser;
+      return next();
+    }
     const user = await User.findOne(decodedPayload.id);
     if (!user) {
       return next(new AppError("Invalid token. Please login again", 401));
@@ -43,6 +59,7 @@ const protectRoute = async (
     res.locals.user = user;
     next();
   } catch (err) {
+    console.log(err);
     next(err);
   }
 };

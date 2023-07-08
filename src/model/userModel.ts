@@ -1,9 +1,11 @@
 import mongoose, { Schema } from "mongoose";
 import bcryptjs from "bcryptjs";
 import AppError from "../utils/AppError";
-import { createUser } from "../services/redis/queries/user";
-
+import { serializeUserData } from "../services/redis/queries/user";
+import redisClient from "../services/redis/redisClient";
+import { uniqueEmailKey } from "../services/util/keys";
 import { UserRole } from "../config/enums";
+import { mongoIdToMillis } from "../utils/converter";
 
 const userSchema = new Schema<IUser.UserDocument>({
   email: {
@@ -72,8 +74,12 @@ userSchema.pre("save", async function (next) {
 
 userSchema.post<IUser.UserDocument>("save", async function () {
   try {
-    console.log(this);
-    await createUser(this._id, this);
+    const { key, data } = serializeUserData(this._id, this);
+    await redisClient.setHash(key, data);
+    await redisClient.createSortedSet(uniqueEmailKey(), {
+      score: mongoIdToMillis(this._id),
+      member: this.email,
+    });
   } catch (err) {
     throw err;
   }

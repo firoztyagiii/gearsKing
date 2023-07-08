@@ -1,4 +1,8 @@
 import { Request, Response, NextFunction } from "express";
+import redisClient from "../services/redis/redisClient";
+import mongoose from "mongoose";
+import { uniqueEmailKey, userKey } from "../services/util/keys";
+import { comparePassword } from "../utils/compare";
 import User from "../entity/userEntity";
 import AppError from "../utils/AppError";
 import jwt from "jsonwebtoken";
@@ -22,7 +26,6 @@ const signToken = (payload: object) => {
 const signUp = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { email, password, username, confirmPassword } = req.body;
-
     const user = await User.create({
       email,
       password,
@@ -39,7 +42,7 @@ const signUp = async (req: Request, res: Response, next: NextFunction) => {
       },
     });
   } catch (err) {
-    console.log(err);
+    console.log("ERROR --->", err);
     next(err);
   }
 };
@@ -50,9 +53,32 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
     if (!email || !password) {
       return next(new AppError("Email and password are required", 400));
     }
+
+    // REDIS //
+    const redisUserId = await redisClient.getSortedSetMember(
+      uniqueEmailKey(),
+      email
+    );
+    if (redisUserId) {
+      const user = await redisClient.getHash<IRedisUser.UserDocument>(
+        userKey(new mongoose.Types.ObjectId("64a90b86c295ee17f6d27349")) // put key correctly//
+      );
+      if (user) {
+        const isPassCorrect = await comparePassword(password, user.password);
+        if (!isPassCorrect)
+          return next(new AppError("Invalid credentials", 400));
+        const token = await signToken({ id: user._id });
+        return res.status(200).json({
+          status: "success",
+          token,
+        });
+      }
+    }
+    // //
+
     const user = await User.findByEmail(email);
     if (!user) return next(new AppError("Invalid credentials", 400));
-    const isPassCorrect = await user.compare(password);
+    const isPassCorrect = await comparePassword(password, user.password);
     if (!isPassCorrect) return next(new AppError("Invalid credentials", 400));
     const token = await signToken({ id: user._id });
     res.status(200).json({

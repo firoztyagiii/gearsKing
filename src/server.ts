@@ -1,25 +1,24 @@
 import path from "path";
 import dotenv from "dotenv";
+import { app } from "./app";
 
 dotenv.config({
   path: path.resolve(__dirname, "../config.env"),
   debug: true,
 });
 
-import mongoose from "mongoose";
-import { app } from "./app";
-
-const URI = "mongodb://127.0.0.1:27017/gearsKing";
+import connectDB from "./services/mongo";
 
 const init = async () => {
   try {
-    await mongoose.connect(URI);
+    await connectDB();
     console.log("Connected to MongoDB");
     app.listen(process.env.PORT, () => {
       console.log("Server started!");
     });
   } catch (err) {
     console.error(err);
+    process.exit(1);
   }
 };
 

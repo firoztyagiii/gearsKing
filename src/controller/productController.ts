@@ -26,6 +26,7 @@ const postProduct = async (req: Request, res: Response, next: NextFunction) => {
       productDetails,
       category,
     });
+
     res.status(201).json({
       status: "success",
       data: product,

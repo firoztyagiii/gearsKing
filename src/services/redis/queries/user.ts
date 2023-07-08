@@ -1,6 +1,3 @@
-import { Types } from "mongoose";
-import { userKey } from "../../util/keys";
-
 const serialize = (data: IUser.UserDocument): { [key: string]: string } => {
   return {
     _id: data._id.toString(),
@@ -14,11 +11,7 @@ const serialize = (data: IUser.UserDocument): { [key: string]: string } => {
 };
 
 export const serializeUserData = (
-  id: Types.ObjectId,
   user: IUser.UserDocument
-): { key: string; data: { [key: string]: string } } => {
-  return {
-    key: userKey(id),
-    data: serialize(user),
-  };
+): { [key: string]: string } => {
+  return serialize(user);
 };

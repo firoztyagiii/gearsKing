@@ -37,13 +37,10 @@ const protectRoute = async (
     if (req.cookies.jwt) {
       token = req.cookies.jwt;
     }
-
     if (!token) {
       return next(new AppError("You are not logged in", 401));
     }
-
     const decodedPayload = await verifyToken(token);
-
     const redisUser = await redisClient.getHash<IRedisUser.UserDocument>(
       userKey(decodedPayload.id)
     );

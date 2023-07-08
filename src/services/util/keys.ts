@@ -1,8 +1,9 @@
 import { Types } from "mongoose";
 
-const userKey = (id: Types.ObjectId): string => `user#${id.toString()}`;
+const userKey = (id: Types.ObjectId | string): string =>
+  `user#${id.toString()}`;
 const productKey = (id: Types.ObjectId): string => `product#${id.toString()}`;
 const reviewKey = (id: Types.ObjectId): string => `review#${id.toString()}`;
-const uniqueEmailKey = (): string => `user#uniqueEmail`;
+const userIdEmailKey = (): string => `user:idEmail`;
 
-export { userKey, productKey, reviewKey, uniqueEmailKey };
+export { userKey, productKey, reviewKey, userIdEmailKey };

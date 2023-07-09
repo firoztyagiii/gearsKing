@@ -21,5 +21,6 @@ export interface Product {
 export interface ProductDocument extends Product, Document {
   totalReviews: number;
   averageReview: number;
+  slug: string;
   // user: Types.ObjectId;
 }

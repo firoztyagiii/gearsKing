@@ -1,4 +1,6 @@
 import { Request, Response, NextFunction } from "express";
+import redisClient from "../services/redis/redisClient";
+import { productKey } from "../services/util/keys";
 import Product from "../entity/productEntity";
 import mongoose from "mongoose";
 import AppError from "../utils/AppError";
@@ -39,7 +41,15 @@ const postProduct = async (req: Request, res: Response, next: NextFunction) => {
 const getProduct = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
-    const product = await Product.findOne(new mongoose.Types.ObjectId(id));
+    const redisProduct =
+      await redisClient.getJSONHash<IProduct.ProductDocument>(productKey(id));
+    if (redisProduct) {
+      return res.status(200).json({
+        status: "success",
+        data: redisProduct,
+      });
+    }
+    const product = await Product.findOne({ _id: id });
     if (!product) {
       return next(new AppError("No product found", 400));
     }
@@ -109,7 +119,8 @@ const deleteProduct = async (
 ) => {
   try {
     const { id } = req.params;
-    await await Product.delete(new mongoose.Types.ObjectId(id));
+    await Product.delete(new mongoose.Types.ObjectId(id));
+    await redisClient.deleteHash(productKey(id));
     res.status(202).json({
       status: "success",
       data: null,

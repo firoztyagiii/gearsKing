@@ -10,6 +10,9 @@ router
   .patch(protectRoute, reviewController.patchReview)
   .delete(protectRoute, reviewController.deleteReview);
 
-router.route("/").post(protectRoute, reviewController.postReview);
+router
+  .route("/")
+  .get(reviewController.getReviews)
+  .post(protectRoute, reviewController.postReview);
 
 export default router;

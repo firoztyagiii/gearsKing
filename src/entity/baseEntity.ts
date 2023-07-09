@@ -1,25 +1,30 @@
-import { Model, Types } from "mongoose";
+import { FilterQuery, Model, Types } from "mongoose";
+import AppError from "../utils/AppError";
 
 class BaseEntity<D> {
   constructor(protected model: Model<D>) {}
 
-  async findOne(id: Types.ObjectId): Promise<D | null> {
-    return await this.model.findOne({ _id: id });
+  async findOne(
+    filter: FilterQuery<D>,
+    projection: { [key: string]: string } = {},
+    opts: { [key: string]: string } = {}
+  ): Promise<D | null> {
+    return await this.model.findOne(filter, projection, opts);
   }
 
-  async findAll(filter?: { [key: string]: string }): Promise<D[] | []> {
-    const query = this.model.find();
-    const limit = 10;
-    if (filter?.sortby) {
-      query.sort(filter.sortby);
+  async pagination(query: any, page: number, totalDocs: number) {
+    const LIMIT = 10;
+    const TOTALDOC = totalDocs;
+    const TOTALPAGES = Math.ceil(TOTALDOC / LIMIT);
+
+    if (page > TOTALPAGES) {
+      throw new AppError("Maximum page number exceeded", 400);
     }
-    if (filter?.limit) {
-      query.limit(+filter.limit);
+    let SKIP = page - 1 * LIMIT;
+    if (SKIP < 1) {
+      SKIP = 0;
     }
-    if (filter?.page) {
-      query.skip(limit * +filter.page - 1);
-    }
-    return await query;
+    return query.skip(SKIP).limit(LIMIT);
   }
 
   async create(payload: { [key: string]: string }): Promise<D | null> {
@@ -30,7 +35,7 @@ class BaseEntity<D> {
     id: Types.ObjectId,
     payload: { [key: string]: string }
   ): Promise<D | null> {
-    return await this.model.findByIdAndUpdate({ _id: id }, payload, {
+    return await this.model.findOneAndUpdate({ _id: id }, payload, {
       new: true,
     });
   }

@@ -1,4 +1,8 @@
 import mongoose, { Schema } from "mongoose";
+import redisClient from "../services/redis/redisClient";
+import { reviewKey, productKey } from "../services/util/keys";
+import { serializeReviewData } from "../services/redis/queries/review";
+import { serializeProductData } from "../services/redis/queries/product";
 import Product from "../entity/productEntity";
 
 const reviewSchema = new Schema<IReview.ReviewDocument, IReview.ReviewModel>({
@@ -41,10 +45,17 @@ reviewSchema.post("save", async function (doc: IReview.ReviewDocument) {
       },
     ]);
     const { total, average } = agg[0];
-    await Product.updateReview(doc.product, {
+    const product = await Product.updateReview(doc.product, {
       total,
       average,
     });
+    await redisClient.setJSONHash(reviewKey(doc._id), serializeReviewData(doc));
+    if (product) {
+      await redisClient.setJSONHash(
+        productKey(product._id),
+        serializeProductData(product)
+      );
+    }
   } catch (err) {
     throw err;
   }
@@ -65,10 +76,20 @@ reviewSchema.post(
         },
       ]);
       const { total, average } = agg[0];
-      await Product.updateReview(doc.product, {
+      const product = await Product.updateReview(doc.product, {
         total,
         average,
       });
+      await redisClient.setJSONHash(
+        reviewKey(doc._id),
+        serializeReviewData(doc)
+      );
+      if (product) {
+        await redisClient.setJSONHash(
+          productKey(product._id),
+          serializeProductData(product)
+        );
+      }
     } catch (err) {
       throw err;
     }

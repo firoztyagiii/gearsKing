@@ -22,13 +22,8 @@ class ProductEntity<D> extends BaseEntity<D> {
     );
   }
   async findAllProducts(filter: any): Promise<D[] | null> {
-    const DEFAULT_LIMIT = 10;
-    const DEFAULT_PAGE = 1;
-    const TOTAL = await this.model.countDocuments();
+    const TOTALDOC = await this.model.countDocuments();
     const query = this.model.find({});
-
-    const fields = ["sortby", "order", "page", "limit"];
-
     if (filter.price) {
       const price = filter.price.split("-");
       const min = price[0];
@@ -79,18 +74,10 @@ class ProductEntity<D> extends BaseEntity<D> {
       const sort: { [key: string]: 1 | -1 } = {
         [filter.sortby]: filter.order === "asc" ? -1 : 1,
       };
-      query.sort(sort);
+      return query.sort(sort);
     }
 
-    // if (filter.page) {
-    //   query.skip(+filter.page - 1).limit(+filter.limit | 10);
-    // }
-
-    // fields.forEach((field) => {
-    //   delete filter[field];
-    // });
-
-    return await query;
+    return this.pagination(query, filter.page ? filter.page : 1, TOTALDOC);
   }
 }
 

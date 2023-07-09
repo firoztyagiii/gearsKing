@@ -1,3 +1,3 @@
-const serialize = () => {};
-
-export const serializeProductData = () => {};
+export const serializeProductData = (data: IProduct.ProductDocument) => {
+  return JSON.stringify(data);
+};

@@ -15,7 +15,18 @@ class RedisService {
   }
 
   async setHash(key: string, data: { [key: string]: string }) {
-    await this.client.hset(key, data);
+    const doc = await this.client.hset(key, data);
+    if (doc) {
+      return doc;
+    } else {
+      null;
+    }
+  }
+
+  async setJSONHash(key: string, data: string) {
+    await this.client.hset(key, {
+      value: data,
+    });
   }
 
   async getHash<T>(key: string): Promise<T | null> {
@@ -24,6 +35,15 @@ class RedisService {
       return null;
     }
     return doc as T;
+  }
+
+  async getJSONHash<T>(key: string): Promise<T | null> {
+    const doc = await this.client.hgetall(key);
+    if (doc) {
+      return JSON.parse(doc.value);
+    } else {
+      return null;
+    }
   }
 
   async getHashMember(key: string, objectKey: string): Promise<string | null> {
@@ -46,13 +66,9 @@ class RedisService {
     }
   }
 
-  // async createSortedSet(key: string, data: { score: number; member: string }) {
-  //   await this.client.zadd(key, data.score, data.member);
-  // }
-
-  // async getSortedSetMember(key: string, member: string) {
-  //   return await this.client.zscore(key, member);
-  // }
+  async deleteHash(key: string) {
+    await this.client.del(key);
+  }
 }
 
 export default new RedisService();

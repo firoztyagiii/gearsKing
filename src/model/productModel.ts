@@ -1,5 +1,8 @@
 import slugify from "slugify";
 import mongoose, { Schema } from "mongoose";
+import redisClient from "../services/redis/redisClient";
+import { serializeProductData } from "../services/redis/queries/product";
+import { productKey } from "../services/util/keys";
 
 const productDetailSchema = new Schema(
   {
@@ -63,6 +66,9 @@ const productSchema = new Schema<IProduct.ProductDocument>({
     type: String,
     required: [true, "Thumbnail is required"],
   },
+  slug: {
+    type: String,
+  },
   category: {
     type: String,
     required: [true, "Category is required"],
@@ -84,7 +90,36 @@ const productSchema = new Schema<IProduct.ProductDocument>({
   },
 });
 
-productSchema.post<IProduct.ProductDocument>("save", function () {});
+productSchema.pre<IProduct.ProductDocument>("save", function (next) {
+  if (this.isNew) {
+    this.slug = slugify(this.name, { lower: true });
+    next();
+  }
+});
+
+productSchema.post<IProduct.ProductDocument>(
+  "save",
+  async function (doc: IProduct.ProductDocument) {
+    try {
+      await redisClient.setJSONHash(
+        productKey(doc._id),
+        serializeProductData(doc)
+      );
+    } catch (err) {
+      throw err;
+    }
+  }
+);
+
+productSchema.post<IProduct.ProductDocument>(
+  "findOneAndUpdate",
+  async function (doc: IProduct.ProductDocument) {
+    await redisClient.setJSONHash(
+      productKey(doc._id),
+      serializeProductData(doc)
+    );
+  }
+);
 
 const ProductModel = mongoose.model<IProduct.ProductDocument>(
   "Products",

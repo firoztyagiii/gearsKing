@@ -1,4 +1,4 @@
-import { ErrorRequestHandler, Response } from "express";
+import { Response, ErrorRequestHandler } from "express";
 
 const handleValidationError = (err: any, res: Response) => {
   let message: string[] = [];

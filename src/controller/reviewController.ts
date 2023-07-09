@@ -2,6 +2,8 @@ import { Request, Response, NextFunction } from "express";
 import mongoose from "mongoose";
 import Review from "../entity/reviewEntity";
 import AppError from "../utils/AppError";
+import redisClient from "../services/redis/redisClient";
+import { reviewKey } from "../services/util/keys";
 
 const postReview = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -70,6 +72,7 @@ const deleteReview = async (
   try {
     const { id } = req.params;
     const review = await Review.findOne(new mongoose.Types.ObjectId(id));
+    await redisClient.deleteHash(reviewKey(id));
     if (!review) {
       return next(new AppError("No review found", 400));
     }
@@ -88,4 +91,17 @@ const deleteReview = async (
   }
 };
 
-export { postReview, getReview, patchReview, deleteReview };
+const getReviews = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const reviews = await Review.findAllReviews(req.query);
+    res.status(200).json({
+      status: "success",
+      total: reviews.length,
+      data: reviews,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export { postReview, getReview, patchReview, deleteReview, getReviews };
